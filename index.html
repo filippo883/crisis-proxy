@@ -189,7 +189,7 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
 <script>
 // ─────────────────────────────────────────────────────────────
 // 🔧 CONFIGURA QUI il tuo Cloudflare Worker URL
-const WORKER_URL = 'https://crisis-proxy.alpistacchio.workers.dev';
+const WORKER_URL = '';
 // Es: const WORKER_URL = 'https://crisis-proxy.tuonome.workers.dev';
 // ─────────────────────────────────────────────────────────────
 
@@ -281,7 +281,8 @@ let chart2 = null;
 
 function toXY(pts) {
   if (!pts || !pts.length) return [];
-  return pts.map(p => ({ x: p.t, y: p.v }));
+  // Chart.js time scale con date-fns adapter vuole Date objects, non ms numerici
+  return pts.map(p => ({ x: new Date(p.t), y: p.v }));
 }
 
 function fmtDate(ts) {
@@ -338,8 +339,8 @@ function chartOptions(rawSeries) {
     scales: {
       x: {
         type: 'time',
-        min: new Date(HISTORY_FROM).getTime(),
-        max: Date.now(),
+        min: new Date(HISTORY_FROM),
+        max: new Date(),
         time: { unit:'month', displayFormats:{ month:'MMM yy' } },
         ticks: { font:{ family:"'Space Mono',monospace", size:9 }, maxTicksLimit:10 },
         grid: { color:'rgba(255,255,255,0.04)' },
