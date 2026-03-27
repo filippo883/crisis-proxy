@@ -151,9 +151,9 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
         <div class="chart-legend" id="legend1">
           <span class="legend-item" data-idx="0"><span class="legend-swatch" style="background:#ff6b35"></span>Brent<span class="legend-axis">sx USD/bbl</span></span>
           <span class="legend-item" data-idx="1"><span class="legend-swatch" style="background:#ff4d4d"></span>WTI<span class="legend-axis">sx USD/bbl</span></span>
-          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#f59e0b"></span>Benz. USA<span class="legend-axis">dx USD/gal</span></span>
-          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#fbbf24"></span>Benz. IT<span class="legend-axis">dx EUR/L</span></span>
-          <span class="legend-item" data-idx="4"><span class="legend-swatch" style="background:#4ade80"></span>Gas TTF<span class="legend-axis">dx EUR/MWh</span></span>
+          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#f59e0b"></span>Benz. USA<span class="legend-axis">dx $/gal</span></span>
+          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#fbbf24"></span>Benz. IT<span class="legend-axis">dx €/L</span></span>
+          <span class="legend-item" data-idx="4"><span class="legend-swatch" style="background:#4ade80"></span>Gas TTF<span class="legend-axis">sx €/MWh</span></span>
         </div>
         <span class="chart-range" id="range1"></span>
       </div>
@@ -162,7 +162,7 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
         <canvas id="chart1"></canvas>
       </div>
     </div>
-    <p class="chart-note">Scala sinistra: Brent e WTI (USD/bbl). Scala destra: Benzina USA ($/gal), Benzina IT (€/L), Gas TTF (€/MWh) — ognuna con la propria scala per leggere chiaramente le variazioni giornaliere. Tooltip: valori reali.</p>
+    <p class="chart-note">Scala sinistra (USD/€ per unità): Brent, WTI e Gas TTF in comune. Scala destra ($/gal · €/L): Benzina USA e Italia, posizionate nella metà inferiore per separazione visiva. Tooltip: valori reali al giorno.</p>
   </div>
 
   <!-- GRAFICO 2: Cambi + Oro + VIX -->
@@ -171,10 +171,10 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-legend" id="legend2">
-          <span class="legend-item" data-idx="0"><span class="legend-swatch" style="background:#818cf8"></span>EUR/USD<span class="legend-axis">sx</span></span>
-          <span class="legend-item" data-idx="1"><span class="legend-swatch" style="background:#a78bfa"></span>EUR/JPY<span class="legend-axis">sx2</span></span>
-          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#fbbf24"></span>Oro USD/oz<span class="legend-axis">dx</span></span>
-          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#f87171"></span>VIX<span class="legend-axis">dx2</span></span>
+          <span class="legend-item" data-idx="0"><span class="legend-swatch" style="background:#818cf8"></span>EUR/USD<span class="legend-axis">fascia bassa</span></span>
+          <span class="legend-item" data-idx="1"><span class="legend-swatch" style="background:#a78bfa"></span>EUR/JPY<span class="legend-axis">fascia bassa</span></span>
+          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#fbbf24"></span>Oro USD/oz<span class="legend-axis">dx fascia media</span></span>
+          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#f87171"></span>VIX<span class="legend-axis">sx scala piena</span></span>
         </div>
         <span class="chart-range" id="range2"></span>
       </div>
@@ -183,7 +183,7 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
         <canvas id="chart2"></canvas>
       </div>
     </div>
-    <p class="chart-note">EUR/USD (asse sx-principale) · EUR/JPY (asse sx-secondario) · Oro in USD/oz (asse dx) · VIX (asse dx-secondario). Ogni serie ha la propria scala. Tooltip: valori reali.</p>
+    <p class="chart-note">VIX (asse sx, scala piena) · Oro in USD/oz (asse dx, fascia intermedia) · EUR/USD e EUR/JPY (fascia inferiore, scale nascoste). Tooltip: valori reali del giorno.</p>
   </div>
 
   <!-- CARDS -->
@@ -405,21 +405,39 @@ async function buildChart1() {
     { pts:ttfH,    label:'Gas TTF',  unit:'€/MWh',   decimals:2 },
   ];
 
+  // Calcola range dinamici dai dati reali
+  function dataRange(pts) {
+    if (!pts||!pts.length) return { min:0, max:100 };
+    const vals = pts.map(p=>p.v).filter(v=>v!=null&&!isNaN(v));
+    return { min: Math.min(...vals), max: Math.max(...vals) };
+  }
+  function padRange(r, padPct=0.08) {
+    const span = r.max - r.min || r.max * 0.1;
+    return { min: r.min - span*padPct, max: r.max + span*padPct };
+  }
+
+  // Asse sinistro: Brent + WTI + Gas TTF in comune
+  // Gas TTF (~30-60 €/MWh) e petrolio (~60-120 $/bbl) hanno ordini simili → condivisione naturale
+  const oilRange  = dataRange([...(brentH||[]), ...(wtiH||[]), ...(ttfH||[])]);
+  const oilAxis   = padRange(oilRange);
+
+  // Asse destro: Benzina USA ($/gal ~3-5) e Benzina IT (€/L ~1.5-2.5)
+  // Le posizioniamo nella metà INFERIORE del canvas impostando max = 2× il valore reale massimo
+  const gasRange  = dataRange([...(gasusaH||[]), ...(gasitaH||[])]);
+  const gasAxisMax = gasRange.max * 2.1;   // max doppio → le linee stanno nella metà bassa
+  const gasAxisMin = gasRange.min * 0.92;
+
   const ctx=document.getElementById('chart1').getContext('2d');
   if (chart1) chart1.destroy();
   chart1 = new Chart(ctx, {
     type:'line',
     data: {
       datasets: [
-        // asse sinistra: Brent e WTI (USD/bbl)
-        { label:'Brent',   data:toXY(brentH),   yAxisID:'yL', borderColor:'#ff6b35', backgroundColor:'rgba(255,107,53,0.07)', borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'WTI',     data:toXY(wtiH),     yAxisID:'yL', borderColor:'#ff4d4d', backgroundColor:'rgba(255,77,77,0.06)',  borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
-        // asse destra 1: Benzina USA ($/gal)
-        { label:'BenzUSA', data:toXY(gasusaH),  yAxisID:'yR1',borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
-        // asse destra 2: Benzina IT (€/L)
-        { label:'BenzIT',  data:toXY(gasitaH),  yAxisID:'yR2',borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.05)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
-        // asse destra 3: Gas TTF (€/MWh) — scala diversa
-        { label:'GasTTF',  data:toXY(ttfH),     yAxisID:'yR3',borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,0.06)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'Brent',   data:toXY(brentH),   yAxisID:'yL',  borderColor:'#ff6b35', backgroundColor:'rgba(255,107,53,0.07)', borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'WTI',     data:toXY(wtiH),      yAxisID:'yL',  borderColor:'#ff4d4d', backgroundColor:'rgba(255,77,77,0.06)',  borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'BenzUSA', data:toXY(gasusaH),   yAxisID:'yR',  borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)', borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'BenzIT',  data:toXY(gasitaH),   yAxisID:'yR',  borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.05)', borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
+        { label:'GasTTF',  data:toXY(ttfH),      yAxisID:'yL',  borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,0.06)', borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
       ]
     },
     options: {
@@ -432,15 +450,28 @@ async function buildChart1() {
       },
       scales:{
         x: xAxisBase(HISTORY_FROM_MS, toMs),
-        // Asse sinistro: Brent + WTI
-        yL:  { ...yAxisBase({ position:'left', title:'USD/bbl', extra:{ display:true } }),
-               grid:{ color:'rgba(255,255,255,0.04)' } },
-        // Assi destra nascosti (tick disabilitati per non sovraffollare)
-        // ognuno ha la propria scala indipendente
-        yR1: { ...yAxisBase({ position:'right', title:'$/gal', extra:{ display:true } }),
-               grid:{ drawOnChartArea:false } },
-        yR2: { display:false }, // scala indipendente benzina IT, niente tick
-        yR3: { display:false }, // scala indipendente gas TTF, niente tick
+        // Asse sinistro: Brent, WTI, Gas TTF — scala comune, occupa tutta l'altezza
+        yL: {
+          type:'linear', position:'left',
+          min: oilAxis.min, max: oilAxis.max,
+          ticks:{ font:{ family:"'Space Mono',monospace", size:9 }, color:'#6b6b80',
+                  callback: v => v.toFixed(0) },
+          grid:{ color:'rgba(255,255,255,0.04)' },
+          border:{ color:'rgba(255,255,255,0.07)' },
+          title:{ display:true, text:'USD o EUR / unità', color:'#6b6b80',
+                  font:{ family:"'Space Mono',monospace", size:8 } },
+        },
+        // Asse destro: Benzina USA + IT — max impostato al doppio → linee nella metà bassa
+        yR: {
+          type:'linear', position:'right',
+          min: gasAxisMin, max: gasAxisMax,
+          ticks:{ font:{ family:"'Space Mono',monospace", size:9 }, color:'#6b6b80',
+                  callback: v => v < gasRange.min*0.98 ? '' : v.toFixed(2) }, // nascondi tick sotto range reale
+          grid:{ drawOnChartArea:false },
+          border:{ color:'rgba(255,255,255,0.07)' },
+          title:{ display:true, text:'$/gal · €/L (metà bassa)', color:'#6b6b80',
+                  font:{ family:"'Space Mono',monospace", size:8 } },
+        },
       }
     }
   });
@@ -477,14 +508,48 @@ async function buildChart2() {
 
   const ctx=document.getElementById('chart2').getContext('2d');
   if (chart2) chart2.destroy();
+
+  // Calcola range dinamici
+  function dr(pts) {
+    if (!pts||!pts.length) return {min:0,max:1};
+    const v=pts.map(p=>p.v).filter(v=>v!=null&&!isNaN(v));
+    return {min:Math.min(...v), max:Math.max(...v)};
+  }
+
+  const vixR   = dr(vixH);    // es. 15-40
+  const goldR  = dr(goldH);   // es. 2800-3500
+  const usdR   = dr(eurusdH); // es. 1.02-1.12
+  const jpyR   = dr(eurjpyH); // es. 155-168
+
+  // VIX: occupa TUTTA l'altezza — min/max = range reale con pad
+  const vixMax = vixR.max * 1.08;
+  const vixMin = vixR.min * 0.92;
+
+  // Oro: occupa la METÀ CENTRALE — posizioniamo con offset verticale
+  // Impostiamo max = goldMax + (goldMax-goldMin)*1.2 → oro nella fascia 40%-80%
+  const goldSpan = (goldR.max - goldR.min) || goldR.max*0.05;
+  const goldMax  = goldR.max + goldSpan * 1.3;  // aggiunge spazio sopra
+  const goldMin  = goldR.min - goldSpan * 0.3;  // piccolo spazio sotto
+
+  // EUR/USD: occupa il TERZO INFERIORE
+  // max impostato a 3× il range sopra il min → serie nella fascia bassa
+  const usdSpan  = (usdR.max - usdR.min) || 0.05;
+  const usdMax   = usdR.max + usdSpan * 3.5;  // molto spazio sopra → serie in basso
+  const usdMin   = usdR.min - usdSpan * 0.2;
+
+  // EUR/JPY: stessa logica, scala propria nella parte bassa
+  const jpySpan  = (jpyR.max - jpyR.min) || 5;
+  const jpyMax   = jpyR.max + jpySpan * 3.5;
+  const jpyMin   = jpyR.min - jpySpan * 0.2;
+
   chart2 = new Chart(ctx, {
     type:'line',
     data:{
       datasets:[
-        { label:'EUR/USD', data:toXY(eurusdH), yAxisID:'yL',  borderColor:'#818cf8', backgroundColor:'rgba(129,140,248,0.07)', borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'EUR/JPY', data:toXY(eurjpyH), yAxisID:'yL2', borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.06)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
-        { label:'Oro',     data:toXY(goldH),   yAxisID:'yR1', borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.07)',  borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'VIX',     data:toXY(vixH),    yAxisID:'yR2', borderColor:'#f87171', backgroundColor:'rgba(248,113,113,0.07)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'EUR/USD', data:toXY(eurusdH), yAxisID:'yUSD', borderColor:'#818cf8', backgroundColor:'rgba(129,140,248,0.07)', borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'EUR/JPY', data:toXY(eurjpyH), yAxisID:'yJPY', borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.06)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
+        { label:'Oro',     data:toXY(goldH),   yAxisID:'yGold',borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.07)',  borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'VIX',     data:toXY(vixH),    yAxisID:'yVIX', borderColor:'#f87171', backgroundColor:'rgba(248,113,113,0.07)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false },
       ]
     },
     options:{
@@ -497,12 +562,38 @@ async function buildChart2() {
       },
       scales:{
         x: xAxisBase(HISTORY_FROM_MS, toMs),
-        yL:  { ...yAxisBase({ position:'left',  title:'EUR/USD', extra:{ display:true } }),
-               grid:{ color:'rgba(255,255,255,0.04)' } },
-        yL2: { display:false }, // EUR/JPY: scala propria, no tick
-        yR1: { ...yAxisBase({ position:'right', title:'Oro $/oz', extra:{ display:true } }),
-               grid:{ drawOnChartArea:false } },
-        yR2: { display:false }, // VIX: scala propria, no tick
+        // VIX — asse sinistro principale, occupa tutta l'altezza
+        yVIX: {
+          type:'linear', position:'left',
+          min:vixMin, max:vixMax,
+          ticks:{ font:{family:"'Space Mono',monospace",size:9}, color:'#f87171',
+                  callback:v=>v.toFixed(0) },
+          grid:{ color:'rgba(255,255,255,0.04)' },
+          border:{ color:'rgba(255,255,255,0.07)' },
+          title:{ display:true, text:'VIX', color:'#f87171',
+                  font:{family:"'Space Mono',monospace",size:8} },
+        },
+        // Oro — asse destro, fascia intermedia
+        yGold: {
+          type:'linear', position:'right',
+          min:goldMin, max:goldMax,
+          ticks:{ font:{family:"'Space Mono',monospace",size:9}, color:'#fbbf24',
+                  callback:v => v>=goldR.min && v<=goldR.max*1.01 ? Math.round(v).toLocaleString('it-IT') : '' },
+          grid:{ drawOnChartArea:false },
+          border:{ color:'rgba(255,255,255,0.07)' },
+          title:{ display:true, text:'Oro $/oz', color:'#fbbf24',
+                  font:{family:"'Space Mono',monospace",size:8} },
+        },
+        // EUR/USD — asse nascosto, terzo inferiore
+        yUSD: {
+          type:'linear', position:'left', display:false,
+          min:usdMin, max:usdMax,
+        },
+        // EUR/JPY — asse nascosto, terzo inferiore
+        yJPY: {
+          type:'linear', position:'right', display:false,
+          min:jpyMin, max:jpyMax,
+        },
       }
     }
   });
@@ -533,9 +624,9 @@ function crisisClass(change, crisisDir) {
 
 function crisisPillHTML(change, crisisDir) {
   const cls = crisisClass(change, crisisDir);
-  if (cls === 'flat') return `<span class="crisis-pill flat">— stabile</span>`;
-  if (cls === 'worse')  return `<span class="crisis-pill worse">▲ peggio</span>`;
-  if (cls === 'better') return `<span class="crisis-pill better">▼ meglio</span>`;
+  if (cls === 'flat')   return `<span class="crisis-pill flat">— stabile</span>`;
+  if (cls === 'worse')  return `<span class="crisis-pill worse">▼ peggio</span>`;
+  if (cls === 'better') return `<span class="crisis-pill better">▲ meglio</span>`;
 }
 
 function fmt(v,dec) {
