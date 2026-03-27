@@ -54,35 +54,61 @@ h1 span { color:var(--accent); }
 .legend-item:hover { color:var(--text); }
 .legend-item.hidden { opacity:0.3; text-decoration:line-through; }
 .legend-swatch { width:18px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-axis { font-size:8px; color:var(--muted); margin-left:2px; opacity:0.7; }
 .chart-range { font-family:var(--mono); font-size:9px; color:var(--muted); letter-spacing:0.06em; white-space:nowrap; }
 .chart-wrap { position:relative; width:100%; height:300px; }
 .chart-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:11px; color:var(--muted); background:var(--surface); z-index:2; border-radius:4px; }
 .chart-note { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:6px; line-height:1.6; }
 
+/* ── Cards ── */
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 @media (max-width:580px) { .grid { grid-template-columns:1fr; } }
+
 .card { background:var(--surface); border:0.5px solid var(--border); border-radius:8px; padding:1.25rem 1.4rem 1.1rem; position:relative; overflow:hidden; transition:border-color 0.2s, transform 0.15s; }
 .card:hover { border-color:var(--border-strong); transform:translateY(-1px); }
-.card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--card-accent,transparent); border-radius:8px 8px 0 0; }
-.card[data-group="oil"]  { --card-accent:linear-gradient(90deg,#ff8c42,#ff4d4d); }
-.card[data-group="gas"]  { --card-accent:linear-gradient(90deg,#f59e0b,#ff8c42); }
-.card[data-group="fx"]   { --card-accent:linear-gradient(90deg,#818cf8,#6366f1); }
-.card[data-group="safe"] { --card-accent:linear-gradient(90deg,#fbbf24,#f59e0b); }
-.card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.9rem; }
+
+/* Barra superiore crisi — 4px, sostituisce la precedente da 2px */
+.card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; border-radius:8px 8px 0 0; background: var(--crisis-bar, rgba(255,255,255,0.08)); }
+
+/* Colori barra crisi */
+.card.crisis-worse { --crisis-bar: linear-gradient(90deg, #ef4444, #dc2626); }
+.card.crisis-better { --crisis-bar: linear-gradient(90deg, #22c55e, #16a34a); }
+.card.crisis-flat   { --crisis-bar: rgba(255,255,255,0.08); }
+
+/* Indicatore crisi angolo in alto a destra */
+.crisis-dot {
+  position:absolute; top:14px; right:14px;
+  width:8px; height:8px; border-radius:50%;
+  flex-shrink:0;
+}
+.crisis-dot.worse { background:#ef4444; box-shadow:0 0 6px rgba(239,68,68,0.5); }
+.crisis-dot.better { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,0.5); }
+.crisis-dot.flat { background:var(--muted); }
+
+.card-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.9rem; padding-right:20px; }
 .card-label { font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
-.card-icon { font-size:14px; opacity:0.5; }
 .card-value { font-family:var(--mono); font-size:2rem; font-weight:700; line-height:1; color:var(--text); letter-spacing:-0.02em; margin-bottom:0.5rem; }
 .card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:0.6rem; }
 .card-unit { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase; }
+
+/* Pill variazione */
 .change-pill { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 9px; border-radius:3px; display:inline-flex; align-items:center; gap:3px; }
 .up   { color:#86efac; background:rgba(34,197,94,0.12); }
 .down { color:#fca5a5; background:rgba(239,68,68,0.12); }
 .flat { color:var(--muted); background:rgba(255,255,255,0.05); }
+
+/* Crisis pill (separato, accanto al change pill) */
+.crisis-pill { font-family:var(--mono); font-size:10px; font-weight:700; padding:2px 7px; border-radius:3px; display:inline-flex; align-items:center; gap:4px; }
+.crisis-pill.worse  { color:#fca5a5; background:rgba(239,68,68,0.12); }
+.crisis-pill.better { color:#86efac; background:rgba(34,197,94,0.12); }
+.crisis-pill.flat   { color:var(--muted); background:rgba(255,255,255,0.04); }
+
 .skeleton { animation:shimmer 1.4s ease-in-out infinite; }
 .skel-val { height:32px; width:70%; background:var(--surface2); border-radius:4px; margin-bottom:0.5rem; }
 .skel-bar { height:12px; width:40%; background:var(--surface2); border-radius:3px; }
 @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
 .card-error { font-family:var(--mono); font-size:11px; color:#f87171; margin-top:8px; line-height:1.6; }
+
 footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2rem; display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; }
 .footer-note { font-family:var(--mono); font-size:10px; color:var(--muted); line-height:1.8; }
 .footer-note a { color:var(--muted); }
@@ -109,25 +135,25 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
   <div id="setup-banner">
     <h3>⚙️ Configurazione richiesta</h3>
     <p>
-      Per dati live su petrolio, benzina, gas, oro e VIX serve il Cloudflare Worker gratuito.<br>
+      Per dati live su petrolio, benzina, gas, oro, VIX e cambi real-time serve il Cloudflare Worker gratuito.<br>
       1. Vai su <a href="https://workers.cloudflare.com" target="_blank">workers.cloudflare.com</a> → account gratuito<br>
       2. Crea nuovo Worker → incolla il contenuto di <code>worker.js</code><br>
       3. Copia l'URL del Worker e incollalo in <code>const WORKER_URL</code> in questo file<br>
-      4. Ricarica su Netlify — tutto live!<br><br>
-      I cambi EUR/USD e EUR/JPY funzionano già subito (fonte BCE/Frankfurter).
+      4. Ricarica su Netlify — tutto live!
     </p>
   </div>
 
+  <!-- GRAFICO 1: Energia -->
   <div class="section-wrap">
     <p class="section-title">Energia — Petrolio · Benzina · Gas</p>
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-legend" id="legend1">
-          <span class="legend-item" data-idx="0"><span class="legend-swatch" style="background:#ff6b35"></span>Brent (USD/bbl)</span>
-          <span class="legend-item" data-idx="1"><span class="legend-swatch" style="background:#ff4d4d"></span>WTI (USD/bbl)</span>
-          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#f59e0b"></span>Benzina USA (USD/gal)</span>
-          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#fbbf24"></span>Benzina IT (EUR/L)</span>
-          <span class="legend-item" data-idx="4"><span class="legend-swatch" style="background:#4ade80"></span>Gas TTF (EUR/MWh ÷10)</span>
+          <span class="legend-item" data-idx="0"><span class="legend-swatch" style="background:#ff6b35"></span>Brent<span class="legend-axis">sx USD/bbl</span></span>
+          <span class="legend-item" data-idx="1"><span class="legend-swatch" style="background:#ff4d4d"></span>WTI<span class="legend-axis">sx USD/bbl</span></span>
+          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#f59e0b"></span>Benz. USA<span class="legend-axis">dx USD/gal</span></span>
+          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#fbbf24"></span>Benz. IT<span class="legend-axis">dx EUR/L</span></span>
+          <span class="legend-item" data-idx="4"><span class="legend-swatch" style="background:#4ade80"></span>Gas TTF<span class="legend-axis">dx EUR/MWh</span></span>
         </div>
         <span class="chart-range" id="range1"></span>
       </div>
@@ -136,18 +162,19 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
         <canvas id="chart1"></canvas>
       </div>
     </div>
-    <p class="chart-note">Benzina USA = retail stimato (RBOB wholesale + tasse ~$1.14/gal). Benzina IT = RBOB + accisa €0.73 + IVA 22%. Gas TTF ÷10 per leggibilità. Passa il mouse per i valori reali.</p>
+    <p class="chart-note">Scala sinistra: Brent e WTI (USD/bbl). Scala destra: Benzina USA ($/gal), Benzina IT (€/L), Gas TTF (€/MWh) — ognuna con la propria scala per leggere chiaramente le variazioni giornaliere. Tooltip: valori reali.</p>
   </div>
 
+  <!-- GRAFICO 2: Cambi + Oro + VIX -->
   <div class="section-wrap">
     <p class="section-title">Cambi · Oro · Volatilità</p>
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-legend" id="legend2">
-          <span class="legend-item" data-idx="0"><span class="legend-swatch" style="background:#818cf8"></span>EUR/USD</span>
-          <span class="legend-item" data-idx="1"><span class="legend-swatch" style="background:#a78bfa"></span>EUR/JPY (÷100)</span>
-          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#fbbf24"></span>Oro USD/oz (÷2000)</span>
-          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#f87171"></span>VIX (÷10)</span>
+          <span class="legend-item" data-idx="0"><span class="legend-swatch" style="background:#818cf8"></span>EUR/USD<span class="legend-axis">sx</span></span>
+          <span class="legend-item" data-idx="1"><span class="legend-swatch" style="background:#a78bfa"></span>EUR/JPY<span class="legend-axis">sx2</span></span>
+          <span class="legend-item" data-idx="2"><span class="legend-swatch" style="background:#fbbf24"></span>Oro USD/oz<span class="legend-axis">dx</span></span>
+          <span class="legend-item" data-idx="3"><span class="legend-swatch" style="background:#f87171"></span>VIX<span class="legend-axis">dx2</span></span>
         </div>
         <span class="chart-range" id="range2"></span>
       </div>
@@ -156,9 +183,10 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
         <canvas id="chart2"></canvas>
       </div>
     </div>
-    <p class="chart-note">Serie normalizzate per confronto visivo. EUR/JPY ÷100, Oro ÷2000, VIX ÷10. Tooltip mostra i valori reali.</p>
+    <p class="chart-note">EUR/USD (asse sx-principale) · EUR/JPY (asse sx-secondario) · Oro in USD/oz (asse dx) · VIX (asse dx-secondario). Ogni serie ha la propria scala. Tooltip: valori reali.</p>
   </div>
 
+  <!-- CARDS -->
   <div class="section-wrap">
     <p class="section-title">Valori correnti</p>
     <div class="grid" id="grid"></div>
@@ -166,9 +194,10 @@ footer { margin-top:2rem; border-top:0.5px solid var(--border); padding-top:1.2r
 
   <footer>
     <div class="footer-note">
-      Cambi: <a href="https://frankfurter.app" target="_blank">Frankfurter / BCE</a> ·
-      Commodities &amp; Gas: Cloudflare Worker → Yahoo Finance<br>
-      Dati indicativi · aggiornati ad ogni ricarica · non costituisce consulenza finanziaria.
+      Cambi real-time: Cloudflare Worker → Yahoo Finance ·
+      Storico cambi: <a href="https://frankfurter.app" target="_blank">BCE/Frankfurter</a><br>
+      Commodities &amp; Gas: Cloudflare Worker → Yahoo Finance ·
+      Dati indicativi · non costituisce consulenza finanziaria.
     </div>
     <div class="footer-note" id="sourceNote"></div>
   </footer>
@@ -181,37 +210,26 @@ const WORKER_URL = 'https://crisis-proxy.alpistacchio.workers.dev';
 // Es: const WORKER_URL = 'https://crisis-proxy.tuonome.workers.dev';
 // ─────────────────────────────────────────────
 
-const HISTORY_FROM_MS = new Date('2026-01-02T00:00:00Z').getTime();
+const HISTORY_FROM_MS = new Date('2026-01-02T12:00:00Z').getTime();
 
 if (!WORKER_URL) document.getElementById('setup-banner').style.display = 'block';
 
-// ── Prezzi benzina ──────────────────────────────────────────
-// RB=F = RBOB wholesale USD/gallon. Retail = wholesale + tasse + margine
-const USA_GAS_ADDER = 1.144; // tasse federali + statali + margine distribuzione
-
-function rbobToRetailUSA(rbob) {
-  return parseFloat((rbob + USA_GAS_ADDER).toFixed(3));
-}
+// ── Benzina ──────────────────────────────────────────────────
+const USA_GAS_ADDER = 1.144;
+function rbobToRetailUSA(v) { return parseFloat((v + USA_GAS_ADDER).toFixed(3)); }
 function rbobToRetailItalia(rbob, eurusd) {
-  const wholesale_eur_l = (rbob / eurusd) / 3.78541;
-  const netto_iva = wholesale_eur_l + 0.7284; // + accisa fissa
-  return parseFloat(Math.min(2.50, Math.max(1.55, netto_iva * 1.22)).toFixed(3));
+  const w = (rbob / eurusd) / 3.78541;
+  return parseFloat(Math.min(2.50, Math.max(1.55, (w + 0.7284) * 1.22)).toFixed(3));
 }
 
-// ── Formattazione date ──────────────────────────────────────
+// ── Date ─────────────────────────────────────────────────────
 const MONTHS_IT = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+function msToLabel(ms) { const d=new Date(ms); return d.getDate()+' '+MONTHS_IT[d.getMonth()]; }
+function msToFull(ms)  { const d=new Date(ms); return d.getDate()+' '+MONTHS_IT[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
 
-function msToLabel(ms) {
-  const d = new Date(ms);
-  return d.getDate() + ' ' + MONTHS_IT[d.getMonth()];
-}
-function msToFull(ms) {
-  const d = new Date(ms);
-  return d.getDate() + ' ' + MONTHS_IT[d.getMonth()] + ' ' + String(d.getFullYear()).slice(2);
-}
+// ── FETCH ────────────────────────────────────────────────────
 
-// ── FETCH ───────────────────────────────────────────────────
-
+// Cambi spot BCE (fallback se Worker non disponibile)
 async function fetchFrankfurter(currencies) {
   const r = await fetch(`https://api.frankfurter.app/latest?from=EUR&to=${currencies.join(',')}`);
   const d = await r.json();
@@ -222,24 +240,21 @@ async function fetchFrankfurter(currencies) {
     prev = (await r2.json()).rates;
   } catch(_){}
   return Object.fromEntries(currencies.map(cur => {
-    const val = d.rates[cur], p = prev?.[cur];
-    return [cur, { value: val, change: p ? ((val-p)/p)*100 : 0 }];
+    const val=d.rates[cur], p=prev?.[cur];
+    return [cur, { value:val, change:p?((val-p)/p)*100:0 }];
   }));
 }
 
+// Storico cambi BCE (per i grafici)
 async function fetchFrankfurterHistory(currency) {
   const today = new Date().toISOString().split('T')[0];
   const r = await fetch(`https://api.frankfurter.app/2026-01-02..${today}?from=EUR&to=${currency}`);
   const d = await r.json();
   if (!d.rates) return [];
   return Object.entries(d.rates)
-    .map(([date, rates]) => ({
-      // Usa mezzogiorno UTC per evitare problemi di timezone
-      t: new Date(date + 'T12:00:00Z').getTime(),
-      v: rates[currency]
-    }))
+    .map(([date, rates]) => ({ t: new Date(date+'T12:00:00Z').getTime(), v: rates[currency] }))
     .filter(p => p.v && !isNaN(p.v))
-    .sort((a,b) => a.t - b.t);
+    .sort((a,b) => a.t-b.t);
 }
 
 async function fetchWorker(ticker, history=false) {
@@ -247,322 +262,400 @@ async function fetchWorker(ticker, history=false) {
   let url = `${WORKER_URL}?ticker=${encodeURIComponent(ticker)}`;
   if (history) url += `&history=1&from=2026-01-02`;
   url += `&_=${Date.now()}`;
-  const r = await fetch(url, { signal: AbortSignal.timeout(15000), cache: 'no-store' });
+  const r = await fetch(url, { signal:AbortSignal.timeout(15000), cache:'no-store' });
   if (!r.ok) throw new Error(`Worker ${r.status}`);
   const j = await r.json();
   if (j && j.error) throw new Error(j.error);
   return j;
 }
 
-// ── CHART helpers ───────────────────────────────────────────
+// ── CHART ────────────────────────────────────────────────────
 
-let chart1 = null, chart2 = null;
+let chart1=null, chart2=null;
 
-// Genera tick labels uniformi sull'asse X (ms lineare)
 function makeXTicks(fromMs, toMs, n=8) {
-  const step = (toMs - fromMs) / (n - 1);
-  return Array.from({length: n}, (_, i) => Math.round(fromMs + i * step));
+  const step = (toMs-fromMs)/(n-1);
+  return Array.from({length:n}, (_,i) => Math.round(fromMs+i*step));
 }
 
-function buildChartOptions(fromMs, toMs, rawSeriesForTooltip) {
-  const ticks = makeXTicks(fromMs, toMs);
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: false,
-    parsing: false, // dati già in formato {x,y}
-    interaction: { mode: 'index', axis: 'x', intersect: false },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        enabled: true,
-        backgroundColor: '#18181f',
-        borderColor: 'rgba(255,255,255,0.18)',
-        borderWidth: 1,
-        titleColor: '#6b6b80',
-        bodyColor: '#e8e8f0',
-        titleFont: { family:"'Space Mono',monospace", size:10 },
-        bodyFont:  { family:"'Space Mono',monospace", size:11 },
-        padding: 12,
-        callbacks: {
-          title(items) {
-            return items.length ? msToFull(items[0].parsed.x) : '';
-          },
-          label(item) {
-            const s = rawSeriesForTooltip[item.datasetIndex];
-            if (!s || !s.pts || !s.pts.length) return '';
-            // cerca il punto reale più vicino al cursore
-            const ts = item.parsed.x;
-            let best = s.pts[0], bestD = Math.abs(s.pts[0].t - ts);
-            for (let i = 1; i < s.pts.length; i++) {
-              const diff = Math.abs(s.pts[i].t - ts);
-              if (diff < bestD) { bestD = diff; best = s.pts[i]; }
-            }
-            if (bestD > 5 * 86400000) return ''; // gap > 5 giorni: ometti
-            const val = s.decimals === 0
-              ? Math.round(best.v).toLocaleString('it-IT')
-              : best.v.toFixed(s.decimals);
-            return `  ${s.label}: ${val} ${s.unit}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        type: 'linear',           // ← NESSUN ADAPTER NECESSARIO
-        min: fromMs,
-        max: toMs,
-        ticks: {
-          values: ticks,          // tick espliciti
-          callback: v => msToLabel(v),
-          font: { family:"'Space Mono',monospace", size:9 },
-          maxRotation: 0,
-          color: '#6b6b80',
-        },
-        grid: { color:'rgba(255,255,255,0.04)' },
-        border: { color:'rgba(255,255,255,0.07)' },
-      },
-      y: {
-        ticks: {
-          font: { family:"'Space Mono',monospace", size:9 },
-          color: '#6b6b80',
-        },
-        grid: { color:'rgba(255,255,255,0.04)' },
-        border: { color:'rgba(255,255,255,0.07)' },
-      }
-    }
-  };
-}
-
-// Converte [{t,v}] → [{x:ms, y:v}] — x come numero, non Date
 function toXY(pts) {
-  if (!pts || !pts.length) return [];
-  return pts.map(p => ({ x: p.t, y: p.v }));
+  if (!pts||!pts.length) return [];
+  return pts.map(p => ({ x:p.t, y:p.v }));
 }
 
 function setRange(id, pts) {
   const el = document.getElementById(id);
-  if (!pts || !pts.length) { el.textContent = ''; return; }
-  el.textContent = msToFull(pts[0].t) + ' → ' + msToFull(pts[pts.length-1].t);
+  if (!pts||!pts.length) { el.textContent=''; return; }
+  el.textContent = msToFull(pts[0].t)+' → '+msToFull(pts[pts.length-1].t);
 }
 
 function initLegendToggle(legendId, getChart) {
   document.getElementById(legendId).querySelectorAll('.legend-item').forEach(item => {
     item.addEventListener('click', () => {
-      const di = parseInt(item.dataset.idx);
-      const ch = getChart();
+      const di=parseInt(item.dataset.idx), ch=getChart();
       if (!ch) return;
-      const meta = ch.getDatasetMeta(di);
-      meta.hidden = !meta.hidden;
-      item.classList.toggle('hidden', !!meta.hidden);
+      const meta=ch.getDatasetMeta(di);
+      meta.hidden=!meta.hidden;
+      item.classList.toggle('hidden',!!meta.hidden);
       ch.update();
     });
   });
 }
 
-// ── GRAFICO 1 ───────────────────────────────────────────────
+// Opzioni base asse X (lineare, ms)
+function xAxisBase(fromMs, toMs) {
+  return {
+    type:'linear', min:fromMs, max:toMs,
+    ticks: {
+      values: makeXTicks(fromMs, toMs),
+      callback: v => msToLabel(v),
+      font:{ family:"'Space Mono',monospace", size:9 },
+      maxRotation:0, color:'#6b6b80',
+    },
+    grid:{ color:'rgba(255,255,255,0.04)' },
+    border:{ color:'rgba(255,255,255,0.07)' },
+  };
+}
+
+// Asse Y comune
+function yAxisBase(opts={}) {
+  return {
+    ticks:{ font:{ family:"'Space Mono',monospace", size:9 }, color:'#6b6b80', ...opts.ticks },
+    grid:{ color:'rgba(255,255,255,0.04)', ...opts.grid },
+    border:{ color:'rgba(255,255,255,0.07)' },
+    position: opts.position || 'left',
+    title: opts.title ? { display:true, text:opts.title, color:'#6b6b80', font:{ family:"'Space Mono',monospace", size:8 } } : undefined,
+    ...opts.extra,
+  };
+}
+
+// Tooltip callback che mostra valori reali
+function makeTooltipCallbacks(rawSeries) {
+  return {
+    title(items) { return items.length ? msToFull(items[0].parsed.x) : ''; },
+    label(item) {
+      const s = rawSeries[item.datasetIndex];
+      if (!s||!s.pts||!s.pts.length) return '';
+      const ts=item.parsed.x;
+      let best=s.pts[0], bestD=Math.abs(s.pts[0].t-ts);
+      for (let i=1;i<s.pts.length;i++) {
+        const diff=Math.abs(s.pts[i].t-ts);
+        if (diff<bestD) { bestD=diff; best=s.pts[i]; }
+      }
+      if (bestD>5*86400000) return '';
+      const val = s.decimals===0 ? Math.round(best.v).toLocaleString('it-IT') : best.v.toFixed(s.decimals);
+      return `  ${s.label}: ${val} ${s.unit}`;
+    }
+  };
+}
+
+function tooltipStyle() {
+  return {
+    enabled:true,
+    backgroundColor:'#18181f',
+    borderColor:'rgba(255,255,255,0.18)', borderWidth:1,
+    titleColor:'#6b6b80', bodyColor:'#e8e8f0',
+    titleFont:{ family:"'Space Mono',monospace", size:10 },
+    bodyFont:{ family:"'Space Mono',monospace", size:11 },
+    padding:12,
+  };
+}
+
+// ── GRAFICO 1: Energia con 2 assi Y ─────────────────────────
+// Asse sinistro (yL): Brent + WTI in USD/bbl (~60-120)
+// Asse destro  (yR): Benzina USA ($/gal ~3-5), Benzina IT (€/L ~1.5-2.5), Gas TTF (€/MWh ~30-60)
+// Ogni serie destra ha la propria scala visiva grazie a yR
+// Per separare benzina e gas usiamo un terzo asse (yR2) per Gas TTF
 
 async function buildChart1() {
   const loading = document.getElementById('chart1-loading');
   loading.style.display = 'flex';
-  loading.textContent = WORKER_URL ? 'Caricamento dati energia...' : 'Worker non configurato — solo BCE disponibile';
+  loading.textContent = WORKER_URL ? 'Caricamento dati energia...' : 'Worker non configurato';
 
   const [brentH, wtiH, rbobH, eurusdH, ttfH] = await Promise.all([
-    WORKER_URL ? fetchWorker('BZ=F', true).catch(()=>null) : Promise.resolve(null),
-    WORKER_URL ? fetchWorker('CL=F', true).catch(()=>null) : Promise.resolve(null),
-    WORKER_URL ? fetchWorker('RB=F', true).catch(()=>null) : Promise.resolve(null),
+    WORKER_URL ? fetchWorker('BZ=F',true).catch(()=>null) : null,
+    WORKER_URL ? fetchWorker('CL=F',true).catch(()=>null) : null,
+    WORKER_URL ? fetchWorker('RB=F',true).catch(()=>null) : null,
     fetchFrankfurterHistory('USD').catch(()=>null),
-    WORKER_URL ? fetchWorker('TTF=F', true).catch(()=>null) : Promise.resolve(null),
+    WORKER_URL ? fetchWorker('TTF=F',true).catch(()=>null) : null,
   ]);
 
-  // Benzina USA retail
-  const gasusaH = rbobH ? rbobH.map(p => ({ t:p.t, v:rbobToRetailUSA(p.v) })) : null;
+  const gasusaH = rbobH ? rbobH.map(p=>({t:p.t, v:rbobToRetailUSA(p.v)})) : null;
 
-  // Benzina Italia retail
-  let gasitaH = null;
+  let gasitaH=null;
   if (rbobH && eurusdH && eurusdH.length) {
-    const fxMap = {};
-    eurusdH.forEach(p => { fxMap[Math.round(p.t/86400000)] = p.v; });
-    gasitaH = rbobH.map(p => {
-      const k = Math.round(p.t/86400000);
-      const eur = fxMap[k] || fxMap[k-1] || fxMap[k+1] || 1.09;
-      return { t:p.t, v:rbobToRetailItalia(p.v, eur) };
-    }).filter(p => !isNaN(p.v));
+    const fxMap={};
+    eurusdH.forEach(p=>{ fxMap[Math.round(p.t/86400000)]=p.v; });
+    gasitaH = rbobH.map(p=>{
+      const k=Math.round(p.t/86400000);
+      const eur=fxMap[k]||fxMap[k-1]||fxMap[k+1]||1.09;
+      return { t:p.t, v:rbobToRetailItalia(p.v,eur) };
+    }).filter(p=>!isNaN(p.v));
   }
 
-  // TTF: diviso 10 per stare sullo stesso asse visivo
-  const ttfScaled = ttfH ? ttfH.map(p => ({ t:p.t, v:parseFloat((p.v/10).toFixed(3)) })) : null;
-
-  const toMs = Date.now();
-  const anchor = brentH || wtiH || eurusdH;
-  setRange('range1', anchor);
-  loading.style.display = 'none';
+  const toMs=Date.now();
+  setRange('range1', brentH||wtiH||eurusdH);
+  loading.style.display='none';
 
   const rawSeries = [
-    { pts:brentH,   label:'Brent',     unit:'USD/bbl', decimals:2 },
-    { pts:wtiH,     label:'WTI',       unit:'USD/bbl', decimals:2 },
-    { pts:gasusaH,  label:'Benz.USA',  unit:'$/gal',   decimals:3 },
-    { pts:gasitaH,  label:'Benz.IT',   unit:'€/L',     decimals:3 },
-    { pts:ttfH,     label:'Gas TTF',   unit:'€/MWh',   decimals:2 }, // reale, non ÷10
+    { pts:brentH,  label:'Brent',    unit:'USD/bbl', decimals:2 },
+    { pts:wtiH,    label:'WTI',      unit:'USD/bbl', decimals:2 },
+    { pts:gasusaH, label:'Benz.USA', unit:'$/gal',   decimals:3 },
+    { pts:gasitaH, label:'Benz.IT',  unit:'€/L',     decimals:3 },
+    { pts:ttfH,    label:'Gas TTF',  unit:'€/MWh',   decimals:2 },
   ];
 
-  const ctx = document.getElementById('chart1').getContext('2d');
+  const ctx=document.getElementById('chart1').getContext('2d');
   if (chart1) chart1.destroy();
   chart1 = new Chart(ctx, {
-    type: 'line',
+    type:'line',
     data: {
       datasets: [
-        { label:'Brent',    data:toXY(brentH),   borderColor:'#ff6b35', backgroundColor:'rgba(255,107,53,0.07)', borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'WTI',      data:toXY(wtiH),     borderColor:'#ff4d4d', backgroundColor:'rgba(255,77,77,0.06)',  borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'BenzUSA',  data:toXY(gasusaH),  borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'BenzIT',   data:toXY(gasitaH),  borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.05)',borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
-        { label:'GasTTF',   data:toXY(ttfScaled),borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,0.06)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
+        // asse sinistra: Brent e WTI (USD/bbl)
+        { label:'Brent',   data:toXY(brentH),   yAxisID:'yL', borderColor:'#ff6b35', backgroundColor:'rgba(255,107,53,0.07)', borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'WTI',     data:toXY(wtiH),     yAxisID:'yL', borderColor:'#ff4d4d', backgroundColor:'rgba(255,77,77,0.06)',  borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        // asse destra 1: Benzina USA ($/gal)
+        { label:'BenzUSA', data:toXY(gasusaH),  yAxisID:'yR1',borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
+        // asse destra 2: Benzina IT (€/L)
+        { label:'BenzIT',  data:toXY(gasitaH),  yAxisID:'yR2',borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.05)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
+        // asse destra 3: Gas TTF (€/MWh) — scala diversa
+        { label:'GasTTF',  data:toXY(ttfH),     yAxisID:'yR3',borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,0.06)',borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
       ]
     },
-    options: buildChartOptions(HISTORY_FROM_MS, toMs, rawSeries),
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:false,
+      parsing:false,
+      interaction:{ mode:'index', axis:'x', intersect:false },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{ ...tooltipStyle(), callbacks:makeTooltipCallbacks(rawSeries) }
+      },
+      scales:{
+        x: xAxisBase(HISTORY_FROM_MS, toMs),
+        // Asse sinistro: Brent + WTI
+        yL:  { ...yAxisBase({ position:'left', title:'USD/bbl', extra:{ display:true } }),
+               grid:{ color:'rgba(255,255,255,0.04)' } },
+        // Assi destra nascosti (tick disabilitati per non sovraffollare)
+        // ognuno ha la propria scala indipendente
+        yR1: { ...yAxisBase({ position:'right', title:'$/gal', extra:{ display:true } }),
+               grid:{ drawOnChartArea:false } },
+        yR2: { display:false }, // scala indipendente benzina IT, niente tick
+        yR3: { display:false }, // scala indipendente gas TTF, niente tick
+      }
+    }
   });
 }
 
-// ── GRAFICO 2 ───────────────────────────────────────────────
+// ── GRAFICO 2: Cambi + Oro + VIX con 4 assi ─────────────────
+// EUR/USD → yL  (asse sx principale, ~1.05-1.15)
+// EUR/JPY → yL2 (asse sx secondario nascosto, ~155-165)
+// Oro     → yR1 (asse dx, ~2800-3500 USD/oz)
+// VIX     → yR2 (asse dx secondario, ~12-40)
 
 async function buildChart2() {
-  const loading = document.getElementById('chart2-loading');
-  loading.style.display = 'flex';
-  loading.textContent = 'Caricamento cambi e mercati...';
+  const loading=document.getElementById('chart2-loading');
+  loading.style.display='flex';
+  loading.textContent='Caricamento cambi e mercati...';
 
   const [eurusdH, eurjpyH, goldH, vixH] = await Promise.all([
     fetchFrankfurterHistory('USD').catch(()=>null),
     fetchFrankfurterHistory('JPY').catch(()=>null),
-    WORKER_URL ? fetchWorker('GC=F', true).catch(()=>null) : Promise.resolve(null),
-    WORKER_URL ? fetchWorker('^VIX', true).catch(()=>null) : Promise.resolve(null),
+    WORKER_URL ? fetchWorker('GC=F',true).catch(()=>null) : null,
+    WORKER_URL ? fetchWorker('^VIX',true).catch(()=>null) : null,
   ]);
 
-  // Normalizzazione visiva
-  const eurjpyN = eurjpyH ? eurjpyH.map(p => ({ t:p.t, v:parseFloat((p.v/100).toFixed(4)) })) : null;
-  const goldN   = goldH   ? goldH.map(p   => ({ t:p.t, v:parseFloat((p.v/2000).toFixed(4)) })) : null;
-  const vixN    = vixH    ? vixH.map(p    => ({ t:p.t, v:parseFloat((p.v/10).toFixed(3))  })) : null;
-
-  const toMs = Date.now();
+  const toMs=Date.now();
   setRange('range2', eurusdH);
-  loading.style.display = 'none';
+  loading.style.display='none';
 
   const rawSeries = [
-    { pts:eurusdH, label:'EUR/USD', unit:'',       decimals:4 },
-    { pts:eurjpyH, label:'EUR/JPY', unit:'',       decimals:2 },
-    { pts:goldH,   label:'Oro',     unit:'$/oz',   decimals:0 },
-    { pts:vixH,    label:'VIX',     unit:'',       decimals:2 },
+    { pts:eurusdH, label:'EUR/USD', unit:'',     decimals:4 },
+    { pts:eurjpyH, label:'EUR/JPY', unit:'',     decimals:2 },
+    { pts:goldH,   label:'Oro',     unit:'$/oz', decimals:0 },
+    { pts:vixH,    label:'VIX',     unit:'',     decimals:2 },
   ];
 
-  const ctx = document.getElementById('chart2').getContext('2d');
+  const ctx=document.getElementById('chart2').getContext('2d');
   if (chart2) chart2.destroy();
   chart2 = new Chart(ctx, {
-    type: 'line',
-    data: {
-      datasets: [
-        { label:'EUR/USD',  data:toXY(eurusdH), borderColor:'#818cf8', backgroundColor:'rgba(129,140,248,0.07)', borderWidth:1.6, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'EUR/JPY',  data:toXY(eurjpyN), borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.06)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
-        { label:'Oro',      data:toXY(goldN),   borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.07)',  borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
-        { label:'VIX',      data:toXY(vixN),    borderColor:'#f87171', backgroundColor:'rgba(248,113,113,0.07)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false },
+    type:'line',
+    data:{
+      datasets:[
+        { label:'EUR/USD', data:toXY(eurusdH), yAxisID:'yL',  borderColor:'#818cf8', backgroundColor:'rgba(129,140,248,0.07)', borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'EUR/JPY', data:toXY(eurjpyH), yAxisID:'yL2', borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.06)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false, borderDash:[5,4] },
+        { label:'Oro',     data:toXY(goldH),   yAxisID:'yR1', borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,0.07)',  borderWidth:1.8, pointRadius:0, tension:0.2, spanGaps:false },
+        { label:'VIX',     data:toXY(vixH),    yAxisID:'yR2', borderColor:'#f87171', backgroundColor:'rgba(248,113,113,0.07)', borderWidth:1.5, pointRadius:0, tension:0.2, spanGaps:false },
       ]
     },
-    options: buildChartOptions(HISTORY_FROM_MS, toMs, rawSeries),
+    options:{
+      responsive:true, maintainAspectRatio:false, animation:false,
+      parsing:false,
+      interaction:{ mode:'index', axis:'x', intersect:false },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{ ...tooltipStyle(), callbacks:makeTooltipCallbacks(rawSeries) }
+      },
+      scales:{
+        x: xAxisBase(HISTORY_FROM_MS, toMs),
+        yL:  { ...yAxisBase({ position:'left',  title:'EUR/USD', extra:{ display:true } }),
+               grid:{ color:'rgba(255,255,255,0.04)' } },
+        yL2: { display:false }, // EUR/JPY: scala propria, no tick
+        yR1: { ...yAxisBase({ position:'right', title:'Oro $/oz', extra:{ display:true } }),
+               grid:{ drawOnChartArea:false } },
+        yR2: { display:false }, // VIX: scala propria, no tick
+      }
+    }
   });
 }
 
-// ── CARDS ───────────────────────────────────────────────────
+// ── CARDS con indicatore crisi ────────────────────────────────
 
+// crisisDir: 'worse-if-up' = sale → peggio (petrolio, benzina, VIX)
+//            'worse-if-down' = scende → peggio (cambi, oro)
 const CARDS = [
-  { id:'brent',  label:'Brent Crude Oil',  unit:'USD / barile',      group:'oil',  icon:'🛢', ticker:'BZ=F',  decimals:2, source:'worker' },
-  { id:'wti',    label:'WTI Crude Oil',     unit:'USD / barile',      group:'oil',  icon:'🛢', ticker:'CL=F',  decimals:2, source:'worker' },
-  { id:'gasusa', label:'Benzina USA',       unit:'USD / gallone',     group:'gas',  icon:'⛽', ticker:'RB=F',  decimals:3, source:'worker' },
-  { id:'gasita', label:'Benzina Italia',    unit:'EUR / litro',       group:'gas',  icon:'⛽', ticker:null,    decimals:3, source:'gasita' },
-  { id:'eurusd', label:'EUR / USD',         unit:'tasso di cambio',   group:'fx',   icon:'💱', ticker:'USD',   decimals:4, source:'frankfurter' },
-  { id:'eurjpy', label:'EUR / JPY',         unit:'tasso di cambio',   group:'fx',   icon:'💱', ticker:'JPY',   decimals:2, source:'frankfurter' },
-  { id:'gold',   label:'Oro Spot',          unit:'USD / oncia',       group:'safe', icon:'🪙', ticker:'GC=F',  decimals:0, source:'worker' },
-  { id:'vix',    label:'VIX – Fear Index',  unit:'indice volatilità', group:'safe', icon:'📊', ticker:'^VIX',  decimals:2, source:'worker' },
+  { id:'brent',  label:'Brent Crude Oil',  unit:'USD / barile',      group:'oil',  icon:'🛢', ticker:'BZ=F',     decimals:2, source:'worker',       crisisDir:'worse-if-up'   },
+  { id:'wti',    label:'WTI Crude Oil',     unit:'USD / barile',      group:'oil',  icon:'🛢', ticker:'CL=F',     decimals:2, source:'worker',       crisisDir:'worse-if-up'   },
+  { id:'gasusa', label:'Benzina USA',       unit:'USD / gallone',     group:'gas',  icon:'⛽', ticker:'RB=F',     decimals:3, source:'worker',       crisisDir:'worse-if-up'   },
+  { id:'gasita', label:'Benzina Italia',    unit:'EUR / litro',       group:'gas',  icon:'⛽', ticker:null,       decimals:3, source:'gasita',       crisisDir:'worse-if-up'   },
+  { id:'eurusd', label:'EUR / USD',         unit:'tasso di cambio',   group:'fx',   icon:'💱', ticker:'EURUSD=X', decimals:4, source:'worker-fx',    crisisDir:'worse-if-down' },
+  { id:'eurjpy', label:'EUR / JPY',         unit:'tasso di cambio',   group:'fx',   icon:'💱', ticker:'EURJPY=X', decimals:2, source:'worker-fx',    crisisDir:'worse-if-down' },
+  { id:'gold',   label:'Oro Spot',          unit:'USD / oncia',       group:'safe', icon:'🪙', ticker:'GC=F',     decimals:0, source:'worker',       crisisDir:'worse-if-down' },
+  { id:'vix',    label:'VIX – Fear Index',  unit:'indice volatilità', group:'safe', icon:'📊', ticker:'^VIX',     decimals:2, source:'worker',       crisisDir:'worse-if-up'   },
 ];
 
-function fmt(v, dec) {
-  if (v == null || isNaN(v)) return '—';
-  return dec === 0 ? Math.round(v).toLocaleString('it-IT') : v.toFixed(dec);
+function crisisClass(change, crisisDir) {
+  if (change == null || isNaN(change) || Math.abs(change) < 0.01) return 'flat';
+  const goingUp = change > 0;
+  if (crisisDir === 'worse-if-up')   return goingUp ? 'worse' : 'better';
+  if (crisisDir === 'worse-if-down') return goingUp ? 'better' : 'worse';
+  return 'flat';
+}
+
+function crisisPillHTML(change, crisisDir) {
+  const cls = crisisClass(change, crisisDir);
+  if (cls === 'flat') return `<span class="crisis-pill flat">— stabile</span>`;
+  if (cls === 'worse')  return `<span class="crisis-pill worse">▲ peggio</span>`;
+  if (cls === 'better') return `<span class="crisis-pill better">▼ meglio</span>`;
+}
+
+function fmt(v,dec) {
+  if (v==null||isNaN(v)) return '—';
+  return dec===0 ? Math.round(v).toLocaleString('it-IT') : v.toFixed(dec);
 }
 function pill(ch) {
-  if (ch == null || isNaN(ch)) return `<span class="change-pill flat">—</span>`;
-  const cls = ch>0.01?'up':ch<-0.01?'down':'flat';
-  const arr = ch>0.01?'▲':ch<-0.01?'▼':'—';
+  if (ch==null||isNaN(ch)) return `<span class="change-pill flat">—</span>`;
+  const cls=ch>0.01?'up':ch<-0.01?'down':'flat';
+  const arr=ch>0.01?'▲':ch<-0.01?'▼':'—';
   return `<span class="change-pill ${cls}">${arr} ${ch>0?'+':''}${ch.toFixed(2)}%</span>`;
 }
+
 function skeletonCard(c) {
   return `<div class="card skeleton" data-group="${c.group}" data-id="${c.id}">
-    <div class="card-header"><span class="card-label">${c.label}</span><span class="card-icon">${c.icon}</span></div>
+    <div class="card-header"><span class="card-label">${c.label}</span></div>
     <div class="skel-val"></div><div class="skel-bar"></div>
   </div>`;
 }
+
 function renderCard(cfg, data) {
   const el = document.querySelector(`[data-id="${cfg.id}"]`);
   if (!el) return;
   el.classList.remove('skeleton');
   if (!data) {
-    const hint = !WORKER_URL && cfg.source !== 'frankfurter' ? 'Configura il Worker URL' : 'Dato non disponibile';
+    const hint = !WORKER_URL ? 'Configura il Worker URL' : 'Dato non disponibile';
+    el.className = `card crisis-flat`;
+    el.setAttribute('data-group', cfg.group);
     el.innerHTML = `<div class="card-header"><span class="card-label">${cfg.label}</span><span class="card-icon">${cfg.icon}</span></div><div class="card-value">—</div><p class="card-error">${hint}</p>`;
     return;
   }
+  const cc = crisisClass(data.change, cfg.crisisDir);
+  el.className = `card crisis-${cc}`;
+  el.setAttribute('data-group', cfg.group);
   el.innerHTML = `
+    <div class="crisis-dot ${cc}"></div>
     <div class="card-header"><span class="card-label">${cfg.label}</span><span class="card-icon">${cfg.icon}</span></div>
     <div class="card-value">${fmt(data.value, cfg.decimals)}</div>
-    <div class="card-footer"><span class="card-unit">${cfg.unit}</span>${pill(data.change)}</div>`;
+    <div class="card-footer">
+      <span class="card-unit">${cfg.unit}</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        ${crisisPillHTML(data.change, cfg.crisisDir)}
+        ${pill(data.change)}
+      </div>
+    </div>`;
 }
+
 function buildGrid() {
   document.getElementById('grid').innerHTML = CARDS.map(skeletonCard).join('');
 }
 
-// ── MAIN ────────────────────────────────────────────────────
+// ── MAIN ─────────────────────────────────────────────────────
 
 async function loadAll() {
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning'); btn.disabled = true;
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('spinning'); btn.disabled=true;
   buildGrid();
-  document.getElementById('ts').textContent = 'Aggiornamento in corso...';
+  document.getElementById('ts').textContent='Aggiornamento in corso...';
 
-  let fxData = {};
-  try { fxData = await fetchFrankfurter(['USD','JPY']); } catch(e){}
+  // Cambi real-time via Worker (EURUSD=X, EURJPY=X) — più aggiornati del fixing BCE
+  // Fallback su Frankfurter/BCE se Worker non disponibile
+  let fxData={};
+  if (WORKER_URL) {
+    try {
+      const [eurusdW, eurjpyW] = await Promise.all([
+        fetchWorker('EURUSD=X').catch(()=>null),
+        fetchWorker('EURJPY=X').catch(()=>null),
+      ]);
+      if (eurusdW) fxData['USD'] = eurusdW;
+      if (eurjpyW) fxData['JPY'] = eurjpyW;
+    } catch(_){}
+  }
+  // Fallback BCE se Worker mancante o errore
+  if (!fxData['USD'] || !fxData['JPY']) {
+    try {
+      const bce = await fetchFrankfurter(
+        (!fxData['USD'] && !fxData['JPY']) ? ['USD','JPY'] :
+        !fxData['USD'] ? ['USD'] : ['JPY']
+      );
+      if (!fxData['USD'] && bce['USD']) fxData['USD'] = bce['USD'];
+      if (!fxData['JPY'] && bce['JPY']) fxData['JPY'] = bce['JPY'];
+    } catch(_){}
+  }
   renderCard(CARDS.find(c=>c.id==='eurusd'), fxData['USD']);
   renderCard(CARDS.find(c=>c.id==='eurjpy'), fxData['JPY']);
 
-  const workerResults = {};
+  // Commodities via Worker
+  const workerResults={};
   await Promise.allSettled(CARDS.filter(c=>c.source==='worker').map(async cfg => {
-    try { workerResults[cfg.id] = await fetchWorker(cfg.ticker); }
-    catch(e) { workerResults[cfg.id] = null; }
-
-    if (cfg.id === 'gasusa' && workerResults['gasusa']) {
-      const rbob = workerResults['gasusa'];
-      renderCard(cfg, { value: rbobToRetailUSA(rbob.value), change: rbob.change });
+    try { workerResults[cfg.id]=await fetchWorker(cfg.ticker); }
+    catch(e) { workerResults[cfg.id]=null; }
+    if (cfg.id==='gasusa' && workerResults['gasusa']) {
+      const rbob=workerResults['gasusa'];
+      renderCard(cfg, { value:rbobToRetailUSA(rbob.value), change:rbob.change });
     } else {
       renderCard(cfg, workerResults[cfg.id]);
     }
   }));
 
-  const rbob = workerResults['gasusa'];
-  const eurusd = fxData['USD'];
-  let gasitaData = null;
-  if (rbob && eurusd) {
-    gasitaData = { value: rbobToRetailItalia(rbob.value, eurusd.value), change: rbob.change * 0.35 };
-  }
-  renderCard(CARDS.find(c=>c.id==='gasita'), gasitaData);
+  // Benzina IT
+  const rbob=workerResults['gasusa'], eurusd=fxData['USD'];
+  renderCard(
+    CARDS.find(c=>c.id==='gasita'),
+    rbob&&eurusd ? { value:rbobToRetailItalia(rbob.value,eurusd.value), change:rbob.change*0.35 } : null
+  );
 
+  // Grafici
   await Promise.all([buildChart1(), buildChart2()]);
 
   document.getElementById('ts').textContent =
-    'Aggiornato: ' + new Date().toLocaleString('it-IT', { weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
-  document.getElementById('sourceNote').textContent = WORKER_URL
-    ? 'BCE/Frankfurter (cambi) · Worker → Yahoo Finance (commodities, storico)'
-    : 'BCE/Frankfurter attivo · Worker non configurato (solo cambi)';
+    'Aggiornato: '+new Date().toLocaleString('it-IT',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
 
-  btn.classList.remove('spinning'); btn.disabled = false;
+  const fxSource = WORKER_URL ? 'Yahoo Finance real-time' : 'BCE/Frankfurter (fixing giornaliero)';
+  document.getElementById('sourceNote').textContent = `Cambi: ${fxSource} · Commodities: Worker → Yahoo Finance`;
+
+  btn.classList.remove('spinning'); btn.disabled=false;
 }
 
-initLegendToggle('legend1', () => chart1);
-initLegendToggle('legend2', () => chart2);
+initLegendToggle('legend1', ()=>chart1);
+initLegendToggle('legend2', ()=>chart2);
 loadAll();
 </script>
 </body>
